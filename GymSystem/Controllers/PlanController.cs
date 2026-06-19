@@ -1,4 +1,4 @@
-﻿using GymSystem.Contexts;
+﻿using GymSystem.DAL.Contexts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

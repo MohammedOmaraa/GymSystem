@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace GymSystem.Migrations
+namespace GymSystem.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddPlansTable : Migration
+    public partial class PlanModule : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
