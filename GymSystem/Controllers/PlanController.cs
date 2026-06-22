@@ -6,9 +6,9 @@ namespace GymSystem.Controllers
     public class PlanController : Controller
     {
         private readonly IPlanRepository planRepository;
-        public PlanController()
+        public PlanController(IPlanRepository planRepository)
         {
-            planRepository = new PlanRepository();
+            this.planRepository = planRepository;
         }
         public async Task<IActionResult> Index()
         {

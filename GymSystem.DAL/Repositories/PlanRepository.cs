@@ -7,9 +7,9 @@ namespace GymSystem.DAL.Repositories
     public class PlanRepository : IPlanRepository
     {
         private readonly GymDbContext dbContext;
-        public PlanRepository()
+        public PlanRepository(GymDbContext dbContext)
         {
-            dbContext = new GymDbContext();
+            this.dbContext = dbContext;
         }
         public void Add(Plan plan)
         {
