@@ -21,9 +21,6 @@ namespace GymSystem.DAL.Configurations
             builder.Property(p => p.CreatedAt)
                 .HasDefaultValueSql("GETDATE()");
 
-            builder.Property(p => p.IsActive)
-                .HasDefaultValue(true);
-
             builder.ToTable(tb =>
             {
                 tb.HasCheckConstraint(

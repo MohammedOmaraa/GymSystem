@@ -1,19 +1,19 @@
-﻿using GymSystem.DAL.Configurations;
-using GymSystem.DAL.Entities;
+﻿using GymSystem.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace GymSystem.DAL.Contexts
 {
     public class GymDbContext : DbContext
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public GymDbContext(DbContextOptions<GymDbContext> options) : base(options)
         {
-            optionsBuilder.UseSqlServer("Server=.;database=GymSystem;Trusted_Connection=True;TrustServerCertificate=True");
+            
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new PlanConfigurations());
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
 
         public DbSet<Plan> Plans { get; set; }
