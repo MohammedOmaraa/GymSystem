@@ -2,6 +2,7 @@
 using GymSystem.DAL.Entities;
 using GymSystem.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace GymSystem.DAL.Repositories.Classes
 {
@@ -18,6 +19,11 @@ namespace GymSystem.DAL.Repositories.Classes
             dbContext.Set<TEntity>().Add(item);
         }
 
+        public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
+        {
+            return await dbContext.Set<TEntity>().AnyAsync(predicate, ct);
+        }
+
         public async Task<int> CompleteAsync()
         {
             return await dbContext.SaveChangesAsync();
@@ -28,6 +34,12 @@ namespace GymSystem.DAL.Repositories.Classes
             var item = dbContext.Set<TEntity>().FirstOrDefault(p => p.Id == id);
             if (item != null)
                 dbContext.Set<TEntity>().Remove(item);
+        }
+
+        public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool isTracked, CancellationToken ct = default)
+        {
+            var items = isTracked ? dbContext.Set<TEntity>() : dbContext.Set<TEntity>().AsNoTracking();
+            return await items.FirstOrDefaultAsync(predicate, ct);
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync(bool isTracked, CancellationToken ct = default)
