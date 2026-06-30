@@ -5,7 +5,7 @@ using GymSystemG03.BLL.ViewModels.MembersViewModels;
 
 namespace GymSystem.BLL.Services.Classes
 {
-    internal class MemberServices : IMemberServices
+    public class MemberServices : IMemberServices
     {
         private readonly IGrnericRepository<Member> memberRepository;
         private readonly IGrnericRepository<Membership> membershipRepository;
