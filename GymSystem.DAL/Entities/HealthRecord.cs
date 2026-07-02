@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GymSystem.DAL.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GymSystem.DAL.Entities
 {
@@ -8,9 +9,7 @@ namespace GymSystem.DAL.Entities
 
         public decimal Weight { get; set; }
 
-
-        [Required, MaxLength(5)]
-        public string BloodType { get; set; } = null!;
+        public BloodType BloodType { get; set; }
 
         [MaxLength(500)]
         public string? Note { get; set; }

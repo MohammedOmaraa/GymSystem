@@ -36,6 +36,7 @@ namespace GymSystem.BLL.Services.Classes
                 Phone = model.Phone,
                 DateOfBirth = model.DateOfBirth,
                 Gender = model.Gender,
+                Photo = "Test",
                 Address = new Address()
                 {
                     BuildingNumber = model.BuildingNumber,

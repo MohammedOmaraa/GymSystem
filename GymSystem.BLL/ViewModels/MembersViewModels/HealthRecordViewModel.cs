@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GymSystem.DAL.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace GymSystemG03.BLL.ViewModels.MembersViewModels
 {
@@ -11,8 +12,7 @@ namespace GymSystemG03.BLL.ViewModels.MembersViewModels
         public decimal Weight { get; set; }
 
         [Required(ErrorMessage = "Blood Type Is Required")]
-        [StringLength(3, ErrorMessage = "Blood type must be 3 characters or less")]
-        public string BloodType { get; set; } = default!;
+        public BloodType BloodType { get; set; }
         public string? Note { get; set; } = default!;
     }
 }

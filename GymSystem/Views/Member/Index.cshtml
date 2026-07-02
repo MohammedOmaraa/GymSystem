@@ -1,24 +1,29 @@
-﻿@model IEnumerable<MemberViewModel>
+﻿@{
+    ViewData["Title"] = "Members";
+}
+@model IEnumerable<MemberViewModel>
 
-
-@* Alert Messages *@
-@* Show Success Message if Member is Created Successfully *@
-<div id="Alert" class="alert alert-success alert-dismissible fade show">
-    <i class="bi bi-check-circle-fill me-2"></i>
-    Member Created Successfully
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-@* Show Error Message if Member Failed To Create *@
-<div id="Alert" class="alert alert-danger alert-dismissible fade show">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-    Member Failed To Create
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
+@if (TempData["Success"] != null)
+{
+    <div id="Alert" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+else if (TempData["Error"] != null)
+{
+    <div id="Alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 
 <div class="container">
     <header class="d-flex justify-content-end mt-5 mb-4 align-items-center">
-        <a asp-controller="Members" asp-action="Create" class="btn btn-fill fw-medium rounded-pill px-3 py-3">
+        <a asp-controller="Member" asp-action="Create" class="btn btn-fill fw-medium rounded-pill px-3 py-3">
             +
             Add Member
         </a>
@@ -51,7 +56,7 @@
                             </td>
                             <td><span>@member.Name</span></td>
                             <td><span>@member.Email</span></td>
-                            <td><span>@member.Gender</span></td>
+                            <td><span>@member.Gender.ToString()</span></td>
                             <td><span>@member.Phone</span></td>
                             <td class="action position-relative">
                                 <div class="dropdown">
@@ -64,7 +69,7 @@
                                     <ul class="dropdown-menu dropdown-menu-start"
                                         aria-labelledby="dropdownMenuButton-member.Id">
                                         <li>
-                                            <a asp-controller="Members" asp-action="MemberDetails"
+                                            <a asp-controller="Member" asp-action="Details"
                                                    asp-route-id="@member.Id"
                                                    class="dropdown-item d-flex align-items-center gap-3">
                                                 <img src="~/images/info 1.jpg" alt="info icon"
@@ -73,7 +78,7 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a asp-controller="Members" asp-action="HealthRecordDetails"
+                                            <a asp-controller="Member" asp-action="HealthRecordDetails"
                                                    asp-route-id="@member.Id"
                                                    class="dropdown-item d-flex align-items-center gap-3">
                                                 <img src="~/images/info 1.jpg" alt="info icon"
@@ -85,7 +90,7 @@
                                             <hr class="dropdown-divider">
                                         </li>
                                         <li>
-                                            <a asp-controller="Members" asp-action="EditMember"
+                                            <a asp-controller="Member" asp-action="EditMember"
                                                    asp-route-id="@member.Id"
                                                    class="dropdown-item d-flex align-items-center gap-3">
                                                 <img src="~/images/edit.jpg" alt="edit icon"
@@ -97,7 +102,7 @@
                                             <hr class="dropdown-divider">
                                         </li>
                                         <li>
-                                            <a asp-controller="Members" asp-action="Delete" asp-route-id="@member.Id"
+                                            <a asp-controller="Member" asp-action="Delete" asp-route-id="@member.Id"
                                                    class="dropdown-item d-flex align-items-center gap-3 text-danger">
                                                 <img src="~/images/x-circle 1.jpg" alt="delete icon"
                                                      style="width: 20px; height: 20px;" />
@@ -126,15 +131,6 @@
     
 </div>
 
-@* <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const alertBox = document.getElementById("Alert");
-        if (alertBox) {
-            setTimeout(() => {
-                alertBox.style.transition = "opacity 0.5s ease";
-                alertBox.style.opacity = "0";
-                setTimeout(() => alertBox.remove(), 500);
-            }, 1500);
-        }
-    });
-</script> *@
+@section Scripts {
+    <partial name="_AlertBoxScripts" />
+}
