@@ -17,5 +17,7 @@ namespace GymSystem.DAL.Contexts
         }
 
         public DbSet<Plan> Plans { get; set; }
+        public DbSet<Session> Session { get; set; }
+        public DbSet<Booking> Booking { get; set; }
     }
 }
