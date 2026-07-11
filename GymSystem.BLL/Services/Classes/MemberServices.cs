@@ -1,7 +1,7 @@
 ﻿using GymSystem.BLL.Services.Interfaces;
 using GymSystem.DAL.Entities;
 using GymSystem.DAL.Repositories.Interfaces;
-using GymSystemG03.BLL.ViewModels.MembersViewModels;
+using GymSystem.BLL.ViewModels.MembersViewModels;
 
 namespace GymSystem.BLL.Services.Classes
 {

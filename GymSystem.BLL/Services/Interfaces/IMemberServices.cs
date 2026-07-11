@@ -1,7 +1,4 @@
-﻿using GymSystemG03.BLL.ViewModels.MembersViewModels;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using GymSystem.BLL.ViewModels.MembersViewModels;
 
 namespace GymSystem.BLL.Services.Interfaces
 {
