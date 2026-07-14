@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GymSystem.BLL.Common;
 using GymSystem.BLL.Services.Interfaces;
 using GymSystem.BLL.ViewModels.SessionsViewModels;
 using GymSystem.DAL.Entities;
@@ -46,25 +47,25 @@ namespace GymSystem.BLL.Services.Classes
             return mapper.Map<IEnumerable<Trainer>, IEnumerable<TrainerSelectViewModel>>(Trainers);
         }
 
-        async Task<bool> ISessionServices.CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct)
+        public async Task<Result> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct)
         {
             if (model.StartDate >= model.EndDate)
-                return false;
+                return Result.Validation("End date must be after start date.");
 
             if (model.StartDate <= DateTime.Now)
-                return false;
+                return Result.Validation("Start date must be in the future.");
 
             var TrainerRepo = unitOfWork.GetRepository<Trainer>();
             var Trainer = await TrainerRepo.GetByIdAsync(model.TrainerId, ct);
 
             if (Trainer is null)
-                return false;
+                return Result.NotFound("Trainer not found.");
 
             var CategoryRepo = unitOfWork.GetRepository<Category>();
             var Category = await CategoryRepo.GetByIdAsync(model.CategoryId, ct);
 
             if (Category is null)
-                return false;
+                return Result.NotFound("Category not found.");
 
             var Session = mapper.Map<CreateSessionViewModel, Session>(model);
 
@@ -72,9 +73,10 @@ namespace GymSystem.BLL.Services.Classes
 
             SessionRepo.Add(Session);
 
-            var Result = await unitOfWork.CompeleteAsync();
+            var affectedRows = await unitOfWork.CompeleteAsync();
 
-            return Result > 0;
+            return affectedRows > 0 ? Result.Success() : Result.Failure("Failed to create session.");
         }
+       
     }
 }

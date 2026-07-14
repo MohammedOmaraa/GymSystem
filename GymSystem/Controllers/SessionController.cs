@@ -35,13 +35,13 @@ namespace GymSystem.Controllers
             }
             var Result = await sessionServices.CreateSessionAsync(model, ct);
 
-            if (Result)
+            if (Result.IsSuccess)
             {
                 TempData["SuccessMessage"] = "Session created successfully!";
                 return RedirectToAction(nameof(Index));
             }
 
-            TempData["ErrorMessage"] = "Failed to create session. Please check the input data.";
+            TempData["ErrorMessage"] = Result.Message;
 
             await PopulateDropDownsAsync(ct); 
 
