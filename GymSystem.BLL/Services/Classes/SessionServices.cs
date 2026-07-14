@@ -77,6 +77,18 @@ namespace GymSystem.BLL.Services.Classes
 
             return affectedRows > 0 ? Result.Success() : Result.Failure("Failed to create session.");
         }
-       
+
+        public async Task<SessionViewModel?> GetSessionByIdAsync(int sessionId, CancellationToken ct)
+        {
+            var Session = await unitOfWork.SessionRepository.GetSessionByIdWithTrainerAndCategoryAsync(sessionId, ct);
+            if (Session == null)
+                return null;
+
+            var mappedSession = mapper.Map<Session, SessionViewModel>(Session);
+
+            mappedSession.AvailableSlots = mappedSession.Capacity - await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(mappedSession.Id, ct);
+
+            return mappedSession;
+        }
     }
 }
