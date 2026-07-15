@@ -165,5 +165,28 @@ namespace GymSystem.BLL.Services.Classes
 
             return AffectedRows > 0 ? Result.Success() : Result.Failure("Failed to update session.");
         }
+
+        public async Task<Result> RemoveSessionAsync(int sessionId, CancellationToken ct = default)
+        {
+            var repo = unitOfWork.GetRepository<Session>();
+            var session = await repo.GetByIdAsync(sessionId, ct);
+
+            if(session is null)
+                return Result.NotFound("Session not found.");
+
+            if(session.EndDate <= DateTime.UtcNow)
+                return Result.Failure("Can't remove a session that has already started.");
+
+            var bookedCount = await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(sessionId, ct);
+
+            if (bookedCount > 0)
+                return Result.Failure("Can't delete a session that has booking");
+
+            repo.Delete(sessionId);
+
+            var affectedRows = await unitOfWork.CompeleteAsync();
+
+            return affectedRows > 0 ? Result.Success() : Result.Failure("Failed to remove a session");
+        }
     }
 }

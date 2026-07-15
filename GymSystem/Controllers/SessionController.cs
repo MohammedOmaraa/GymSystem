@@ -1,5 +1,6 @@
 ﻿using GymSystem.BLL.Services.Interfaces;
 using GymSystem.BLL.ViewModels.SessionsViewModels;
+using GymSystem.DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -99,6 +100,28 @@ namespace GymSystem.Controllers
             TempData["ErrorMessage"] = Result.Message;
             await PopulateDropDownsAsync(ct);
             return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        {
+            var session = await sessionServices.GetSessionByIdAsync(id, ct);
+            if(session is null)
+            {
+                TempData["ErrorMessage"] = "Session not found";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(session);
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed(int id, CancellationToken ct)
+        {
+            var Result = await sessionServices.RemoveSessionAsync(id, ct);
+            TempData[Result.IsSuccess ? "SuccessMessage" : "ErrorMessage"] = Result.IsSuccess ? "Session Deleted Successfullt" : Result.Message;
+            return RedirectToAction(nameof(Index));
         }
     }
 }
