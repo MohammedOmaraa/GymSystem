@@ -26,6 +26,8 @@ namespace GymSystem.BLL.Utilities
 
             CreateMap<Category, CategorySelectViewModel>();
 
+            CreateMap<Session, UpdateSessionViewModel>().ReverseMap();
+
         }
     }
 }

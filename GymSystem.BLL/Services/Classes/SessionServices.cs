@@ -24,7 +24,7 @@ namespace GymSystem.BLL.Services.Classes
             if (!Sessions.Any()) return null;
             Sessions = Sessions.OrderByDescending(s => s.StartDate);
             var MappedSessions = mapper.Map<IEnumerable<Session>, IEnumerable<SessionViewModel>>(Sessions);
-            
+
 
             foreach (var session in MappedSessions)
             {
@@ -49,11 +49,10 @@ namespace GymSystem.BLL.Services.Classes
 
         public async Task<Result> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct)
         {
-            if (model.StartDate >= model.EndDate)
-                return Result.Validation("End date must be after start date.");
+            var validation = ValidateDates(model.StartDate, model.EndDate);
 
-            if (model.StartDate <= DateTime.Now)
-                return Result.Validation("Start date must be in the future.");
+            if (!validation.IsSuccess)
+                return validation;
 
             var TrainerRepo = unitOfWork.GetRepository<Trainer>();
             var Trainer = await TrainerRepo.GetByIdAsync(model.TrainerId, ct);
@@ -89,6 +88,82 @@ namespace GymSystem.BLL.Services.Classes
             mappedSession.AvailableSlots = mappedSession.Capacity - await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(mappedSession.Id, ct);
 
             return mappedSession;
+        }
+
+        private Result ValidateDates(DateTime start, DateTime end)
+        {
+            if (start >= end)
+                return Result.Validation("End date must be after start date.");
+
+            if (start <= DateTime.UtcNow)
+                return Result.Validation("Start date must be in the future.");
+
+            return Result.Success();
+        }
+
+        public async Task<Result<UpdateSessionViewModel>> GetSessionToUpdateAsync(int sessionId, CancellationToken ct)
+        {
+            var Session = await unitOfWork.GetRepository<Session>().GetByIdAsync(sessionId, ct);
+            if (Session is null)
+                return Result<UpdateSessionViewModel>.NotFound("Session not found.");
+
+            var validation = await CanEditSessionAsync(Session, ct);
+
+            if (!validation.IsSuccess)
+                return Result<UpdateSessionViewModel>.Failure(validation.Message!, validation.Kind);
+
+            var model = mapper.Map<Session, UpdateSessionViewModel>(Session);
+            return Result<UpdateSessionViewModel>.Success(model);
+        }
+
+        public async Task<Result> CanEditSessionAsync(Session session, CancellationToken ct)
+        {
+            if (session.StartDate <= DateTime.UtcNow)
+                return Result.Failure("Session has already started.");
+
+            var booked = await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(session.Id, ct);
+            if (booked > 0)
+                return Result.Failure(
+                    "Session already has bookings.");
+
+            return Result.Success();
+        }
+
+        public async Task<Result> UpdateSessionAsync(int id, UpdateSessionViewModel model, CancellationToken ct = default)
+        {
+            var SessionRepo = unitOfWork.GetRepository<Session>();
+            var Session = await SessionRepo.GetByIdAsync(id, ct);
+
+            if (Session is null)
+                return Result.NotFound("Session not found.");
+
+            if (Session.StartDate <= DateTime.UtcNow)
+                return Result.Failure("Can't edit a session that has already started.");
+
+            var BookedCount = await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(Session.Id, ct);
+
+            if (BookedCount > 0)
+                return Result.Failure("Can't edit a session that has booked slots.");
+
+            var validation = ValidateDates(model.StartDate, model.EndDate);
+
+            if (!validation.IsSuccess)
+                return validation;
+
+            var TrainerRepo = unitOfWork.GetRepository<Trainer>();
+            var Trainer = await TrainerRepo.GetByIdAsync(model.TrainerId, ct);
+
+            if (Trainer is null)
+                return Result.NotFound("Trainer not found.");
+
+            Session.UpdatedAt = DateTime.UtcNow;
+
+            mapper.Map(model, Session);
+            SessionRepo.Update(Session);
+
+            var AffectedRows = await unitOfWork.CompeleteAsync();
+
+            return AffectedRows > 0 ? Result.Success() : Result.Failure("Failed to update session.");
         }
     }
 }

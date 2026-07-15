@@ -67,5 +67,38 @@ namespace GymSystem.Controllers
             }
             return View(Session);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id, CancellationToken ct) { 
+            var result = await sessionServices.GetSessionToUpdateAsync(id, ct);
+            if (!result.IsSuccess)
+            {
+                TempData["ErrorMessage"] = result.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            await PopulateDropDownsAsync(ct);
+            return View(result.Value);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, UpdateSessionViewModel model, CancellationToken ct)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropDownsAsync(ct);
+                return View(model);
+            }
+            var Result = await sessionServices.UpdateSessionAsync(id, model, ct);
+            
+            if (Result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "Session updated successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+            
+            TempData["ErrorMessage"] = Result.Message;
+            await PopulateDropDownsAsync(ct);
+            return View(model);
+        }
     }
 }
