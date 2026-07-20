@@ -8,15 +8,38 @@ namespace GymSystem.DAL.Configurations
     {
         public new void Configure(EntityTypeBuilder<Member> builder)
         {
-            builder.Property(X => X.CreatedAt)
-                   .HasColumnName("JoinDate")
+            base.Configure(builder);
+
+            builder.ToTable("Members", table =>
+            {
+                table.HasCheckConstraint(
+                    "CK_Member_JoinDate",
+                    "JoinDate <= GETDATE()");
+            });
+
+            builder.Property(x => x.Photo)
+                   .IsRequired()
+                   .HasColumnType("varchar")
+                   .HasMaxLength(250);
+
+            builder.Property(x => x.JoinDate)
                    .HasDefaultValueSql("GETDATE()");
 
-            builder.HasOne(M => M.HealthRecord)
-                   .WithOne(HR => HR.Member)
-                   .HasForeignKey<HealthRecord>(M => M.MemberId);
+            builder.HasOne(x => x.HealthRecord)
+                   .WithOne(x => x.Member)
+                   .HasForeignKey<HealthRecord>(x => x.MemberId)
+                   .IsRequired()
+                   .OnDelete(DeleteBehavior.Cascade);
 
-            base.Configure(builder);
+            builder.HasMany(x => x.Memberships)
+                   .WithOne(x => x.Member)
+                   .HasForeignKey(x => x.MemberId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(x => x.Bookings)
+                   .WithOne(x => x.Member)
+                   .HasForeignKey(x => x.MemberId)
+                   .OnDelete(DeleteBehavior.Cascade);
 
         }
     }

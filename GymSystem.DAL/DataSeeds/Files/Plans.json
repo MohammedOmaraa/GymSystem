@@ -1,0 +1,30 @@
+[
+  {
+    "Name": "Basic Plan",
+    "Description": "Access to gym equipment",
+    "DurationDays": 30,
+    "Price": 300,
+    "IsActive": true
+  },
+  {
+    "Name": "Standard Plan",
+    "Description": "Gym + Classes",
+    "DurationDays": 60,
+    "Price": 500,
+    "IsActive": true
+  },
+  {
+    "Name": "Premium Plan",
+    "Description": "Unlimited Access",
+    "DurationDays": 90,
+    "Price": 900,
+    "IsActive": true
+  },
+  {
+    "Name": "Annual Plan",
+    "Description": "Full Year Membership",
+    "DurationDays": 365,
+    "Price": 3000,
+    "IsActive": true
+  }
+]

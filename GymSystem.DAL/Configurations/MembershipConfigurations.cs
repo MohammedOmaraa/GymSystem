@@ -8,20 +8,39 @@ namespace GymSystem.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Membership> builder)
         {
-            builder.HasKey(m => m.Id);
-            builder.Property(X => X.CreatedAt)
-                   .HasColumnName("StartDate")
-                   .HasDefaultValueSql("GETDATE()");
+            builder.ToTable("Memberships", table =>
+            {
+                table.HasCheckConstraint(
+                    "CK_Membership_EndDate",
+                    "EndDate > StartDate");
+            });
 
-            builder.HasOne(m => m.Plan)
-                          .WithMany(p => p.Memberships)
-                          .HasForeignKey(m => m.PlanId)
-                          .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(x => x.StartDate)
+                   .IsRequired();
 
-            builder.HasOne(m => m.Member)
-                   .WithMany(me => me.Memberships)
-                   .HasForeignKey(m => m.MemberId)
+            builder.Property(x => x.EndDate)
+                   .IsRequired();
+
+            builder.Property(x => x.CreatedAt)
+                   .HasDefaultValueSql("GETUTCDATE()");
+
+            builder.Property(x => x.UpdatedAt);
+
+            builder.HasOne(x => x.Member)
+                   .WithMany(x => x.Memberships)
+                   .HasForeignKey(x => x.MemberId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(x => x.Plan)
+                   .WithMany(x => x.Memberships)
+                   .HasForeignKey(x => x.PlanId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(x => new
+            {
+                x.MemberId,
+                x.StartDate
+            });
         }
     }
 }

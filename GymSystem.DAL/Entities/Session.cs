@@ -18,13 +18,15 @@ namespace GymSystem.DAL.Entities
         {
             get
             {
-                if (DateTime.Now < StartDate)
+                var now = DateTime.UtcNow;
+
+                if (now < StartDate)
                     return SessionStatus.Upcoming;
 
-                if (DateTime.Now > EndDate)
-                    return SessionStatus.Completed;
+                if (now >= StartDate && now < EndDate)
+                    return SessionStatus.Ongoing;
 
-                return SessionStatus.Ongoing;
+                return SessionStatus.Completed;
             }
         }
 

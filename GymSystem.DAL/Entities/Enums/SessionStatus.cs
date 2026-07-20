@@ -3,8 +3,8 @@ namespace GymSystem.DAL.Entities.Enums
 {
     public enum SessionStatus
     {
-        Upcoming,
-        Ongoing,
-        Completed
+        Upcoming = 1,
+        Ongoing = 2,
+        Completed = 3
     }
 }

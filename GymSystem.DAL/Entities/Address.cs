@@ -8,10 +8,8 @@ namespace GymSystem.DAL.Entities
     {
         public int BuildingNumber { get; set; }
 
-        [Required, MaxLength(30)]
         public string Street { get; set; } = null!;
 
-        [Required, MaxLength(30)]
         public string City { get; set; } = null!;
     }
 }

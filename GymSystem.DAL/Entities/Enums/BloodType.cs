@@ -5,27 +5,27 @@ namespace GymSystem.DAL.Entities.Enums
     public enum BloodType
     {
         [Display(Name = "A+")]
-        APositive,
+        APositive = 1,
 
         [Display(Name = "A-")]
-        ANegative,
+        ANegative = 2,
 
         [Display(Name = "B+")]
-        BPositive,
+        BPositive = 3,
 
         [Display(Name = "B-")]
-        BNegative,
-
-        [Display(Name = "O+")]
-        OPositive,
-
-        [Display(Name = "O-")]
-        ONegative,
+        BNegative = 4,
 
         [Display(Name = "AB+")]
-        ABPositive,
+        ABPositive = 5,
 
         [Display(Name = "AB-")]
-        ABNegative
+        ABNegative = 6,
+
+        [Display(Name = "O+")]
+        OPositive = 7,
+
+        [Display(Name = "O-")]
+        ONegative = 8
     }
 }

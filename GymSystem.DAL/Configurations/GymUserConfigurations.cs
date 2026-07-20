@@ -8,42 +8,69 @@ namespace GymSystem.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<T> builder)
         {
-            builder.Property(X => X.Name)
-                    .HasColumnType("varchar")
-                    .HasMaxLength(50);
+            builder.Property(x => x.Name)
+               .IsRequired()
+               .HasColumnType("varchar")
+               .HasMaxLength(50);
 
-            builder.Property(X => X.Email)
+            builder.Property(x => x.Email)
+                   .IsRequired()
                    .HasColumnType("varchar")
                    .HasMaxLength(100);
 
-            builder.OwnsOne(x => x.Address, address =>
-            {
-                address.Property(a => a.Street)
-                       .HasColumnName("Street")
-                       .HasColumnType("varchar")
-                       .HasMaxLength(30);
-
-                address.Property(a => a.City)
-                       .HasColumnType("varchar")
-                       .HasColumnName("City")
-                       .HasMaxLength(30);
-
-                address.Property(a => a.BuildingNumber)
-                       .HasColumnName("BuildingNumber");
-            });
-
-
-            builder.Property(X => X.Phone)
+            builder.Property(x => x.Phone)
+                   .IsRequired()
                    .HasColumnType("varchar")
                    .HasMaxLength(11);
 
-            builder.HasIndex(x => x.Email).IsUnique();
-            builder.HasIndex(x => x.Phone).IsUnique();
+            builder.Property(x => x.DateOfBirth)
+                   .IsRequired();
 
-            builder.ToTable(t =>
+            builder.Property(x => x.Gender)
+                   .HasConversion<int>()
+                   .IsRequired();
+
+            builder.OwnsOne(x => x.Address, address =>
             {
-                t.HasCheckConstraint("GymUser_EmailCheck", "Email LIKE '_%@_%._%'");
-                t.HasCheckConstraint("GymUser_PhoneCheck", "[Phone] LIKE '010%' OR [Phone] LIKE '011%' OR [Phone] LIKE '012%' OR [Phone] LIKE '015%'");
+                address.Property(a => a.BuildingNumber)
+                       .HasColumnName("BuildingNumber")
+                       .IsRequired();
+
+                address.Property(a => a.Street)
+                       .HasColumnName("Street")
+                       .HasColumnType("varchar")
+                       .HasMaxLength(30)
+                       .IsRequired();
+
+                address.Property(a => a.City)
+                       .HasColumnName("City")
+                       .HasColumnType("varchar")
+                       .HasMaxLength(30)
+                       .IsRequired();
+            });
+
+            builder.HasIndex(x => x.Email)
+                   .IsUnique();
+
+            builder.HasIndex(x => x.Phone)
+                   .IsUnique();
+
+            builder.ToTable(table =>
+            {
+                table.HasCheckConstraint(
+                    "CK_GymUser_Email",
+                    "Email LIKE '_%@_%._%'");
+
+                table.HasCheckConstraint(
+                    "CK_GymUser_Phone",
+                    "Phone LIKE '010________' OR " +
+                    "Phone LIKE '011________' OR " +
+                    "Phone LIKE '012________' OR " +
+                    "Phone LIKE '015________'");
+
+                table.HasCheckConstraint(
+                    "CK_GymUser_BuildingNumber",
+                    "BuildingNumber > 0");
             });
         }
     }

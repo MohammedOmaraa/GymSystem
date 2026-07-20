@@ -8,9 +8,18 @@ namespace GymSystem.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Category> builder)
         {
-            builder.Property(X => X.CategoryName)
-                .HasColumnType("varchar")
-                .HasMaxLength(20);
+            builder.Property(x => x.CategoryName)
+               .IsRequired()
+               .HasColumnType("varchar")
+               .HasMaxLength(30);
+
+            builder.HasIndex(x => x.CategoryName)
+                   .IsUnique();
+
+            builder.Property(x => x.CreatedAt)
+                   .HasDefaultValueSql("GETUTCDATE()");
+
+            builder.Property(x => x.UpdatedAt);
 
             builder.HasData(
                              new Category { Id = 1, CategoryName = "Cardio" },

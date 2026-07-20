@@ -8,44 +8,35 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GymSystem.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AllModules : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<bool>(
-                name: "IsActive",
-                table: "Plans",
-                type: "bit",
-                nullable: false,
-                oldClrType: typeof(bool),
-                oldType: "bit",
-                oldDefaultValue: true);
-
             migrationBuilder.CreateTable(
-                name: "Category",
+                name: "Categories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CategoryName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CategoryName = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Category", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Member",
+                name: "Members",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Photo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    JoinDate1 = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Photo = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
                     JoinDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
@@ -58,20 +49,43 @@ namespace GymSystem.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Member", x => x.Id);
-                    table.CheckConstraint("GymUser_EmailCheck", "Email LIKE '_%@_%._%'");
-                    table.CheckConstraint("GymUser_PhoneCheck", "[Phone] LIKE '010%' OR [Phone] LIKE '011%' OR [Phone] LIKE '012%' OR [Phone] LIKE '015%'");
+                    table.PrimaryKey("PK_Members", x => x.Id);
+                    table.CheckConstraint("CK_GymUser_BuildingNumber", "BuildingNumber > 0");
+                    table.CheckConstraint("CK_GymUser_Email", "Email LIKE '_%@_%._%'");
+                    table.CheckConstraint("CK_GymUser_Phone", "Phone LIKE '010________' OR Phone LIKE '011________' OR Phone LIKE '012________' OR Phone LIKE '015________'");
+                    table.CheckConstraint("CK_Member_JoinDate", "JoinDate <= GETDATE()");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Trainer",
+                name: "Plans",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    DurationDays = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Plans", x => x.Id);
+                    table.CheckConstraint("CK_Plan_DurationDays", "DurationDays BETWEEN 1 AND 365");
+                    table.CheckConstraint("CK_Plan_Price", "Price > 0");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Trainers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Specialty = table.Column<int>(type: "int", nullable: false),
-                    HireDate1 = table.Column<DateTime>(type: "datetime2", nullable: false),
                     HireDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
@@ -84,20 +98,22 @@ namespace GymSystem.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Trainer", x => x.Id);
-                    table.CheckConstraint("GymUser_EmailCheck1", "Email LIKE '_%@_%._%'");
-                    table.CheckConstraint("GymUser_PhoneCheck1", "[Phone] LIKE '010%' OR [Phone] LIKE '011%' OR [Phone] LIKE '012%' OR [Phone] LIKE '015%'");
+                    table.PrimaryKey("PK_Trainers", x => x.Id);
+                    table.CheckConstraint("CK_GymUser_BuildingNumber1", "BuildingNumber > 0");
+                    table.CheckConstraint("CK_GymUser_Email1", "Email LIKE '_%@_%._%'");
+                    table.CheckConstraint("CK_GymUser_Phone1", "Phone LIKE '010________' OR Phone LIKE '011________' OR Phone LIKE '012________' OR Phone LIKE '015________'");
+                    table.CheckConstraint("CK_Trainer_HireDate", "HireDate <= GETDATE()");
                 });
 
             migrationBuilder.CreateTable(
-                name: "HealthRecord",
+                name: "HealthRecords",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Weight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    BloodType = table.Column<string>(type: "nvarchar(5)", maxLength: 5, nullable: false),
+                    Height = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    Weight = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    BloodType = table.Column<int>(type: "int", nullable: false),
                     Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     MemberId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -105,39 +121,42 @@ namespace GymSystem.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_HealthRecord", x => x.Id);
+                    table.PrimaryKey("PK_HealthRecords", x => x.Id);
+                    table.CheckConstraint("CK_HealthRecord_Height", "Height > 0");
+                    table.CheckConstraint("CK_HealthRecord_Weight", "Weight > 0");
                     table.ForeignKey(
-                        name: "FK_HealthRecord_Member_MemberId",
+                        name: "FK_HealthRecords_Members_MemberId",
                         column: x => x.MemberId,
-                        principalTable: "Member",
+                        principalTable: "Members",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Membership",
+                name: "Memberships",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StartDate1 = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MemberId = table.Column<int>(type: "int", nullable: false),
                     PlanId = table.Column<int>(type: "int", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Membership", x => x.Id);
+                    table.PrimaryKey("PK_Memberships", x => x.Id);
+                    table.CheckConstraint("CK_Membership_EndDate", "EndDate > StartDate");
                     table.ForeignKey(
-                        name: "FK_Membership_Member_MemberId",
+                        name: "FK_Memberships_Members_MemberId",
                         column: x => x.MemberId,
-                        principalTable: "Member",
+                        principalTable: "Members",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Membership_Plans_PlanId",
+                        name: "FK_Memberships_Plans_PlanId",
                         column: x => x.PlanId,
                         principalTable: "Plans",
                         principalColumn: "Id",
@@ -145,131 +164,151 @@ namespace GymSystem.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Session",
+                name: "Sessions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TrainerId = table.Column<int>(type: "int", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Session", x => x.Id);
+                    table.PrimaryKey("PK_Sessions", x => x.Id);
                     table.CheckConstraint("CK_Session_Capacity", "Capacity BETWEEN 1 AND 25");
                     table.CheckConstraint("CK_Session_EndDateAfterStartDate", "EndDate > StartDate");
                     table.ForeignKey(
-                        name: "FK_Session_Category_CategoryId",
+                        name: "FK_Sessions_Categories_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Category",
+                        principalTable: "Categories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Session_Trainer_TrainerId",
+                        name: "FK_Sessions_Trainers_TrainerId",
                         column: x => x.TrainerId,
-                        principalTable: "Trainer",
+                        principalTable: "Trainers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Booking",
+                name: "Bookings",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    IsAttended = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     MemberId = table.Column<int>(type: "int", nullable: false),
                     SessionId = table.Column<int>(type: "int", nullable: false),
-                    BookingDate1 = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsAttended = table.Column<bool>(type: "bit", nullable: false),
-                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Booking", x => new { x.SessionId, x.MemberId });
+                    table.PrimaryKey("PK_Bookings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Booking_Member_MemberId",
+                        name: "FK_Bookings_Members_MemberId",
                         column: x => x.MemberId,
-                        principalTable: "Member",
+                        principalTable: "Members",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Booking_Session_SessionId",
+                        name: "FK_Bookings_Sessions_SessionId",
                         column: x => x.SessionId,
-                        principalTable: "Session",
+                        principalTable: "Sessions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
-                table: "Category",
-                columns: new[] { "Id", "CategoryName", "CreatedAt", "UpdatedAt" },
+                table: "Categories",
+                columns: new[] { "Id", "CategoryName", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, "Cardio", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 2, "Strength", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 3, "Yoga", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 4, "Boxing", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null },
-                    { 5, "CrossFit", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null }
+                    { 1, "Cardio", null },
+                    { 2, "Strength", null },
+                    { 3, "Yoga", null },
+                    { 4, "Boxing", null },
+                    { 5, "CrossFit", null }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Booking_MemberId",
-                table: "Booking",
-                column: "MemberId");
+                name: "IX_Bookings_MemberId_SessionId",
+                table: "Bookings",
+                columns: new[] { "MemberId", "SessionId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_HealthRecord_MemberId",
-                table: "HealthRecord",
+                name: "IX_Bookings_SessionId",
+                table: "Bookings",
+                column: "SessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_CategoryName",
+                table: "Categories",
+                column: "CategoryName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HealthRecords_MemberId",
+                table: "HealthRecords",
                 column: "MemberId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Member_Email",
-                table: "Member",
+                name: "IX_Members_Email",
+                table: "Members",
                 column: "Email",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Member_Phone",
-                table: "Member",
+                name: "IX_Members_Phone",
+                table: "Members",
                 column: "Phone",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Membership_MemberId",
-                table: "Membership",
-                column: "MemberId");
+                name: "IX_Memberships_MemberId_StartDate",
+                table: "Memberships",
+                columns: new[] { "MemberId", "StartDate" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Membership_PlanId",
-                table: "Membership",
+                name: "IX_Memberships_PlanId",
+                table: "Memberships",
                 column: "PlanId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Session_CategoryId",
-                table: "Session",
+                name: "IX_Plans_Name",
+                table: "Plans",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Sessions_CategoryId",
+                table: "Sessions",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Session_TrainerId",
-                table: "Session",
+                name: "IX_Sessions_TrainerId",
+                table: "Sessions",
                 column: "TrainerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trainer_Email",
-                table: "Trainer",
+                name: "IX_Trainers_Email",
+                table: "Trainers",
                 column: "Email",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trainer_Phone",
-                table: "Trainer",
+                name: "IX_Trainers_Phone",
+                table: "Trainers",
                 column: "Phone",
                 unique: true);
         }
@@ -278,34 +317,28 @@ namespace GymSystem.DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Booking");
+                name: "Bookings");
 
             migrationBuilder.DropTable(
-                name: "HealthRecord");
+                name: "HealthRecords");
 
             migrationBuilder.DropTable(
-                name: "Membership");
+                name: "Memberships");
 
             migrationBuilder.DropTable(
-                name: "Session");
+                name: "Sessions");
 
             migrationBuilder.DropTable(
-                name: "Member");
+                name: "Members");
 
             migrationBuilder.DropTable(
-                name: "Category");
+                name: "Plans");
 
             migrationBuilder.DropTable(
-                name: "Trainer");
+                name: "Categories");
 
-            migrationBuilder.AlterColumn<bool>(
-                name: "IsActive",
-                table: "Plans",
-                type: "bit",
-                nullable: false,
-                defaultValue: true,
-                oldClrType: typeof(bool),
-                oldType: "bit");
+            migrationBuilder.DropTable(
+                name: "Trainers");
         }
     }
 }

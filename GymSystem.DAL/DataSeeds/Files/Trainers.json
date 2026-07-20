@@ -1,0 +1,28 @@
+[
+  {
+    "Name": "Ahmed Hassan",
+    "Email": "trainer1@gym.com",
+    "Phone": "01011111111",
+    "DateOfBirth": "1990-05-10",
+    "Gender": "Male",
+    "Specialty": "GeneralFitness",
+    "Address": {
+      "BuildingNumber": 10,
+      "Street": "Tahrir",
+      "City": "Cairo"
+    }
+  },
+  {
+    "Name": "Sara Ali",
+    "Email": "trainer2@gym.com",
+    "Phone": "01122222222",
+    "DateOfBirth": "1993-07-21",
+    "Gender": "Female",
+    "Specialty": "Yoga",
+    "Address": {
+      "BuildingNumber": 5,
+      "Street": "Nasr Road",
+      "City": "Cairo"
+    }
+  }
+]

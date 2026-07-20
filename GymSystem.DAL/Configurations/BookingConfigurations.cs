@@ -8,20 +8,35 @@ namespace GymSystem.DAL.Configurations
     {
         public void Configure(EntityTypeBuilder<Booking> builder)
         {
-            builder.Ignore(X => X.Id);
-            builder.Property(X => X.CreatedAt)
-                   .HasColumnName("BookingDate")
-                   .HasDefaultValueSql("GETDATE()");
+            builder.Property(x => x.BookingDate)
+                   .HasDefaultValueSql("GETUTCDATE()")
+                   .IsRequired();
 
-            builder.HasOne(X => X.Session)
-                   .WithMany(X => X.Bookings)
-                   .HasForeignKey(X => X.SessionId);
+            builder.Property(x => x.IsAttended)
+                   .HasDefaultValue(false)
+                   .IsRequired();
 
-            builder.HasOne(X => X.Member)
-                   .WithMany(X => X.Bookings)
-                   .HasForeignKey(X => X.MemberId);
+            builder.Property(x => x.CreatedAt)
+                   .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.HasKey(X => new { X.SessionId, X.MemberId });
+            builder.Property(x => x.UpdatedAt);
+
+            builder.HasIndex(x => new
+            {
+                x.MemberId,
+                x.SessionId
+            })
+            .IsUnique();
+
+            builder.HasOne(x => x.Member)
+                   .WithMany(x => x.Bookings)
+                   .HasForeignKey(x => x.MemberId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(x => x.Session)
+                   .WithMany(x => x.Bookings)
+                   .HasForeignKey(x => x.SessionId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

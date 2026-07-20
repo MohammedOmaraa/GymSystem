@@ -17,7 +17,7 @@ namespace GymSystem.DAL.Repositories.Classes
 
         public async Task<IEnumerable<Session>> GetAllSessionsWithTrainerAndCategoryAsync(CancellationToken ct)
         {
-            var Sessions = dbContext.Session.AsNoTracking()
+            var Sessions = dbContext.Sessions.AsNoTracking()
                                              .Include(s => s.Trainer)
                                              .Include(s => s.Category);
 
@@ -27,12 +27,12 @@ namespace GymSystem.DAL.Repositories.Classes
 
         public Task<int> GetCountOfBookedSlotAsync(int sessionId, CancellationToken ct)
         {
-            return dbContext.Booking.AsNoTracking().CountAsync(b => b.SessionId == sessionId);
+            return dbContext.Bookings.AsNoTracking().CountAsync(b => b.SessionId == sessionId);
         }
 
         public async Task<Session> GetSessionByIdWithTrainerAndCategoryAsync(int sessionId, CancellationToken ct)
         {
-            var Session = dbContext.Session.Include(s => s.Trainer)
+            var Session = dbContext.Sessions.Include(s => s.Trainer)
                                             .Include(s => s.Category)
                                             .FirstOrDefaultAsync(s => s.Id == sessionId, ct);
 

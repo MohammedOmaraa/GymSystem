@@ -5,7 +5,7 @@ namespace GymSystem.DAL.Entities
     {
         public DateTime BookingDate { get; set; }
 
-        public bool IsAttended { get; set; } = false;
+        public bool IsAttended { get; set; }
 
         public int MemberId { get; set; }
 

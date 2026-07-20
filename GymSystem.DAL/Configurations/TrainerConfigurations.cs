@@ -8,11 +8,26 @@ namespace GymSystem.DAL.Configurations
     {
         public new void Configure(EntityTypeBuilder<Trainer> builder)
         {
-            builder.Property(X => X.CreatedAt)
-                   .HasColumnName("HireDate")
+            base.Configure(builder);
+
+            builder.ToTable("Trainers", table =>
+            {
+                table.HasCheckConstraint(
+                    "CK_Trainer_HireDate",
+                    "HireDate <= GETDATE()");
+            });
+
+            builder.Property(x => x.Specialty)
+                   .HasConversion<int>()
+                   .IsRequired();
+
+            builder.Property(x => x.HireDate)
                    .HasDefaultValueSql("GETDATE()");
 
-            base.Configure(builder);
+            builder.HasMany(x => x.Sessions)
+                   .WithOne(x => x.Trainer)
+                   .HasForeignKey(x => x.TrainerId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

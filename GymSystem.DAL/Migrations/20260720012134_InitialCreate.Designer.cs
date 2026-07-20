@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymSystem.DAL.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20260701170333_ChangeBloodTypeToEnum")]
-    partial class ChangeBloodTypeToEnum
+    [Migration("20260720012134_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,36 +27,44 @@ namespace GymSystem.DAL.Migrations
 
             modelBuilder.Entity("GymSystem.DAL.Entities.Booking", b =>
                 {
-                    b.Property<int>("SessionId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("MemberId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("BookingDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasColumnName("BookingDate")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<bool>("IsAttended")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SessionId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("SessionId", "MemberId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("SessionId");
 
-                    b.ToTable("Booking", t =>
-                        {
-                            t.Property("BookingDate")
-                                .HasColumnName("BookingDate1");
-                        });
+                    b.HasIndex("MemberId", "SessionId")
+                        .IsUnique();
+
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("GymSystem.DAL.Entities.Category", b =>
@@ -69,18 +77,23 @@ namespace GymSystem.DAL.Migrations
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
-                        .HasMaxLength(20)
+                        .HasMaxLength(30)
                         .HasColumnType("varchar");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.HasIndex("CategoryName")
+                        .IsUnique();
+
+                    b.ToTable("Categories");
 
                     b.HasData(
                         new
@@ -124,34 +137,40 @@ namespace GymSystem.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BloodType")
-                        .HasMaxLength(5)
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Height")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Weight")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MemberId")
                         .IsUnique();
 
-                    b.ToTable("HealthRecord");
+                    b.ToTable("HealthRecords", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_HealthRecord_Height", "Height > 0");
+
+                            t.HasCheckConstraint("CK_HealthRecord_Weight", "Weight > 0");
+                        });
                 });
 
             modelBuilder.Entity("GymSystem.DAL.Entities.Member", b =>
@@ -163,10 +182,7 @@ namespace GymSystem.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("JoinDate")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
@@ -180,7 +196,9 @@ namespace GymSystem.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("JoinDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -194,7 +212,8 @@ namespace GymSystem.DAL.Migrations
 
                     b.Property<string>("Photo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -207,14 +226,15 @@ namespace GymSystem.DAL.Migrations
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("Member", t =>
+                    b.ToTable("Members", null, t =>
                         {
-                            t.HasCheckConstraint("GymUser_EmailCheck", "Email LIKE '_%@_%._%'");
+                            t.HasCheckConstraint("CK_GymUser_BuildingNumber", "BuildingNumber > 0");
 
-                            t.HasCheckConstraint("GymUser_PhoneCheck", "[Phone] LIKE '010%' OR [Phone] LIKE '011%' OR [Phone] LIKE '012%' OR [Phone] LIKE '015%'");
+                            t.HasCheckConstraint("CK_GymUser_Email", "Email LIKE '_%@_%._%'");
 
-                            t.Property("JoinDate")
-                                .HasColumnName("JoinDate1");
+                            t.HasCheckConstraint("CK_GymUser_Phone", "Phone LIKE '010________' OR Phone LIKE '011________' OR Phone LIKE '012________' OR Phone LIKE '015________'");
+
+                            t.HasCheckConstraint("CK_Member_JoinDate", "JoinDate <= GETDATE()");
                         });
                 });
 
@@ -229,8 +249,7 @@ namespace GymSystem.DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasColumnName("StartDate")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -249,14 +268,13 @@ namespace GymSystem.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemberId");
-
                     b.HasIndex("PlanId");
 
-                    b.ToTable("Membership", t =>
+                    b.HasIndex("MemberId", "StartDate");
+
+                    b.ToTable("Memberships", null, t =>
                         {
-                            t.Property("StartDate")
-                                .HasColumnName("StartDate1");
+                            t.HasCheckConstraint("CK_Membership_EndDate", "EndDate > StartDate");
                         });
                 });
 
@@ -271,7 +289,7 @@ namespace GymSystem.DAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -287,8 +305,7 @@ namespace GymSystem.DAL.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
@@ -299,9 +316,14 @@ namespace GymSystem.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Plans", t =>
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Plans", null, t =>
                         {
                             t.HasCheckConstraint("CK_Plan_DurationDays", "DurationDays BETWEEN 1 AND 365");
+
+                            t.HasCheckConstraint("CK_Plan_Price", "Price > 0");
                         });
                 });
 
@@ -320,11 +342,14 @@ namespace GymSystem.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -344,7 +369,7 @@ namespace GymSystem.DAL.Migrations
 
                     b.HasIndex("TrainerId");
 
-                    b.ToTable("Session", t =>
+                    b.ToTable("Sessions", t =>
                         {
                             t.HasCheckConstraint("CK_Session_Capacity", "Capacity BETWEEN 1 AND 25");
 
@@ -361,10 +386,7 @@ namespace GymSystem.DAL.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("HireDate")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
@@ -378,7 +400,9 @@ namespace GymSystem.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("HireDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -404,16 +428,18 @@ namespace GymSystem.DAL.Migrations
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("Trainer", t =>
+                    b.ToTable("Trainers", null, t =>
                         {
-                            t.HasCheckConstraint("GymUser_EmailCheck", "Email LIKE '_%@_%._%'")
-                                .HasName("GymUser_EmailCheck1");
+                            t.HasCheckConstraint("CK_GymUser_BuildingNumber", "BuildingNumber > 0")
+                                .HasName("CK_GymUser_BuildingNumber1");
 
-                            t.HasCheckConstraint("GymUser_PhoneCheck", "[Phone] LIKE '010%' OR [Phone] LIKE '011%' OR [Phone] LIKE '012%' OR [Phone] LIKE '015%'")
-                                .HasName("GymUser_PhoneCheck1");
+                            t.HasCheckConstraint("CK_GymUser_Email", "Email LIKE '_%@_%._%'")
+                                .HasName("CK_GymUser_Email1");
 
-                            t.Property("HireDate")
-                                .HasColumnName("HireDate1");
+                            t.HasCheckConstraint("CK_GymUser_Phone", "Phone LIKE '010________' OR Phone LIKE '011________' OR Phone LIKE '012________' OR Phone LIKE '015________'")
+                                .HasName("CK_GymUser_Phone1");
+
+                            t.HasCheckConstraint("CK_Trainer_HireDate", "HireDate <= GETDATE()");
                         });
                 });
 
@@ -428,7 +454,7 @@ namespace GymSystem.DAL.Migrations
                     b.HasOne("GymSystem.DAL.Entities.Session", "Session")
                         .WithMany("Bookings")
                         .HasForeignKey("SessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Member");
@@ -472,7 +498,7 @@ namespace GymSystem.DAL.Migrations
 
                             b1.HasKey("MemberId");
 
-                            b1.ToTable("Member");
+                            b1.ToTable("Members");
 
                             b1.WithOwner()
                                 .HasForeignKey("MemberId");
@@ -506,13 +532,13 @@ namespace GymSystem.DAL.Migrations
                     b.HasOne("GymSystem.DAL.Entities.Category", "Category")
                         .WithMany("Sessions")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GymSystem.DAL.Entities.Trainer", "Trainer")
                         .WithMany("Sessions")
                         .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -545,7 +571,7 @@ namespace GymSystem.DAL.Migrations
 
                             b1.HasKey("TrainerId");
 
-                            b1.ToTable("Trainer");
+                            b1.ToTable("Trainers");
 
                             b1.WithOwner()
                                 .HasForeignKey("TrainerId");
