@@ -13,6 +13,7 @@ namespace GymSystem.DAL.Repositories.Interfaces
         Task<int> CompleteAsync();
         Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool isTracked, CancellationToken ct = default);
         Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default);
+        Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken ct = default);
 
     }
 }

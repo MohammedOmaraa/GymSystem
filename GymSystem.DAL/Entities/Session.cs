@@ -18,7 +18,7 @@ namespace GymSystem.DAL.Entities
         {
             get
             {
-                var now = DateTime.UtcNow;
+                var now = DateTime.Now;
 
                 if (now < StartDate)
                     return SessionStatus.Upcoming;

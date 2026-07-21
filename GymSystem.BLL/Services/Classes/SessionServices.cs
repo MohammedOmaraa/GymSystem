@@ -95,7 +95,7 @@ namespace GymSystem.BLL.Services.Classes
             if (start >= end)
                 return Result.Validation("End date must be after start date.");
 
-            if (start <= DateTime.UtcNow)
+            if (start <= DateTime.Now)
                 return Result.Validation("Start date must be in the future.");
 
             return Result.Success();
@@ -118,7 +118,7 @@ namespace GymSystem.BLL.Services.Classes
 
         public async Task<Result> CanEditSessionAsync(Session session, CancellationToken ct)
         {
-            if (session.StartDate <= DateTime.UtcNow)
+            if (session.StartDate <= DateTime.Now)
                 return Result.Failure("Session has already started.");
 
             var booked = await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(session.Id, ct);
@@ -137,7 +137,7 @@ namespace GymSystem.BLL.Services.Classes
             if (Session is null)
                 return Result.NotFound("Session not found.");
 
-            if (Session.StartDate <= DateTime.UtcNow)
+            if (Session.StartDate <= DateTime.Now)
                 return Result.Failure("Can't edit a session that has already started.");
 
             var BookedCount = await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(Session.Id, ct);
@@ -156,7 +156,7 @@ namespace GymSystem.BLL.Services.Classes
             if (Trainer is null)
                 return Result.NotFound("Trainer not found.");
 
-            Session.UpdatedAt = DateTime.UtcNow;
+            Session.UpdatedAt = DateTime.Now;
 
             mapper.Map(model, Session);
             SessionRepo.Update(Session);
@@ -174,7 +174,7 @@ namespace GymSystem.BLL.Services.Classes
             if(session is null)
                 return Result.NotFound("Session not found.");
 
-            if(session.EndDate <= DateTime.UtcNow)
+            if(session.EndDate <= DateTime.Now)
                 return Result.Failure("Can't remove a session that has already started.");
 
             var bookedCount = await unitOfWork.SessionRepository.GetCountOfBookedSlotAsync(sessionId, ct);

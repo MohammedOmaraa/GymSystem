@@ -29,6 +29,9 @@ namespace GymSystem.DAL.Repositories.Classes
             return await dbContext.SaveChangesAsync();
         }
 
+        public Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken ct = default)
+        => predicate == null ? dbContext.Set<TEntity>().AsNoTracking().CountAsync(ct) : dbContext.Set<TEntity>().AsNoTracking().CountAsync(predicate, ct);
+
         public void Delete(int id)
         {
             var item = dbContext.Set<TEntity>().FirstOrDefault(p => p.Id == id);
