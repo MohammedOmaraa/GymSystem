@@ -50,8 +50,10 @@ else if (TempData["Error"] != null)
                         <tr>
                             <td>
                                 <span class="avatar">
-                                    <img src="~/images/User.jpg" alt="Default Avatar" class="rounded-circle"
-                                         style="width: 40px; height: 40px;" />
+                                    <img src="@Url.Action("Photo", "Member", new { fileName = member.Photo })"
+                                         class="rounded-circle"
+                                         style="width:40px;height:40px;object-fit:cover;"
+                                         alt="@member.Name" />
                                 </span>
                             </td>
                             <td><span>@member.Name</span></td>

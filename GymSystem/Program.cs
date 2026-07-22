@@ -27,6 +27,7 @@ namespace GymSystem
             builder.Services.AddScoped<IMemberServices, MemberServices>();
             builder.Services.AddScoped<ISessionServices, SessionServices>();
             builder.Services.AddScoped<IAnalyticsServices, AnalyticsServices>();
+            builder.Services.AddScoped<IAttachmentServices, AttachmentServices>();
             builder.Services.AddAutoMapper(m=> m.AddProfile(new MappingProfile()));
 
 

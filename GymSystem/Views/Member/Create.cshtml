@@ -7,7 +7,7 @@
 <header class="mb-4">
     <h3 class="text-primary-color">Add Member</h3>
 </header>
-<form asp-controller="Member" asp-action="CreateMember" method="post">
+<form asp-controller="Member" asp-action="CreateMember" method="post" enctype="multipart/form-data">
 
     <!-- Step navigation -->
     <ul class="nav nav-tabs mb-4" id="addMemberTabs" role="tablist">
@@ -34,6 +34,17 @@
                 <hr class="mt-2">
             </div>
             <div class="row g-3">
+                <div class="form-group">
+                    <!-- Photo Preview -->
+                    <div class="mt-2">
+                        <img id="photoPreview" src="#" alt="Photo Preview" style="max-width: 200px; display: none;" class="img-thumbnail" />
+                    </div>
+                    <label asp-for="Image" class="control-label">Profile Photo <span class="text-danger">*</span></label>
+                    <input asp-for="Image" type="file" class="form-control" accept="image/*" id="photoInput" required />
+                    <span asp-validation-for="Image" class="text-danger"></span>
+                    <small class="form-text text-muted">Max size: 5 MB. Allowed types: JPG, PNG,JPEG (Required)</small>
+                </div>
+
                 <div class="col-12 col-md-6">
                     <label asp-for="Name" class="form-label">Name</label>
                     <input asp-for="Name" class="form-control" />
@@ -135,7 +146,7 @@
 }
 
 
-@* <script>
+<script>
     // Preview photo before upload
     document.getElementById('photoInput').addEventListener('change', function (e) {
     var file = e.target.files[0];
@@ -149,4 +160,4 @@
     reader.readAsDataURL(file);
     }
     });
-</script> *@
+</script>

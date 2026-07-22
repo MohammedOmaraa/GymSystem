@@ -7,9 +7,11 @@ namespace GymSystem.Controllers
     public class MemberController : Controller
     {
         private readonly IMemberServices memberServices;
+        private readonly IAttachmentServices attachmentServices;
 
-        public MemberController(IMemberServices memberServices) {
+        public MemberController(IMemberServices memberServices, IAttachmentServices attachmentServices) {
             this.memberServices = memberServices;
+            this.attachmentServices = attachmentServices;
         }
 
         public async Task<IActionResult> Index(CancellationToken ct)
@@ -32,12 +34,15 @@ namespace GymSystem.Controllers
 
             var result = await memberServices.CreateMemberAsync(model, ct);
 
-            if (result)
-            
-                TempData["Success"] = "Member Created Successfully";
-            else
-                TempData["Error"] = "Member Failed To Create";
-           
+            if (!result.IsSuccess)
+            {
+                TempData["Error"] = result.Message;
+
+                return View(nameof(Create), model);
+            }
+
+            TempData["Success"] = "Member created successfully.";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -67,6 +72,16 @@ namespace GymSystem.Controllers
             return View(healthRecord);
         }
 
+        [HttpGet]
+        public IActionResult Photo(string fileName)
+        {
+            var result = attachmentServices.GetFile(fileName, "MemberPictures");
+
+            if (!result.IsSuccess)
+                return NotFound();
+
+            return File(result.Value!.Stream, result.Value.ContentType);
+        }
 
     }
 }

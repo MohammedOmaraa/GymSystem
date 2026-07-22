@@ -1,27 +1,35 @@
-﻿using GymSystem.BLL.Services.Interfaces;
+﻿using GymSystem.BLL.Common;
+using GymSystem.BLL.Services.Interfaces;
+using GymSystem.BLL.ViewModels.MembersViewModels;
 using GymSystem.DAL.Entities;
 using GymSystem.DAL.Repositories.Interfaces;
-using GymSystem.BLL.ViewModels.MembersViewModels;
 
 namespace GymSystem.BLL.Services.Classes
 {
     public class MemberServices : IMemberServices
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly IAttachmentServices attachmentServices;
 
-        public MemberServices(IUnitOfWork unitOfWork)
+        public MemberServices(IUnitOfWork unitOfWork, IAttachmentServices attachmentServices)
         {
             this.unitOfWork = unitOfWork;
+            this.attachmentServices = attachmentServices;
         }
 
-        public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
+        public async Task<Result> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
         {
             var memberRepository = unitOfWork.GetRepository<Member>();
 
             var emailExists = await memberRepository.AnyAsync(m => m.Email == model.Email, ct);
+
+            if (emailExists)
+                return Result.Validation("Email already exists.");
+
             var phoneExists = await memberRepository.AnyAsync(m => m.Phone == model.Phone, ct);
 
-            if (emailExists || phoneExists) return false;
+            if (phoneExists)
+                return Result.Validation("Phone already exists.");
 
             var Member = new Member()
             {
@@ -30,7 +38,7 @@ namespace GymSystem.BLL.Services.Classes
                 Phone = model.Phone,
                 DateOfBirth = model.DateOfBirth,
                 Gender = model.Gender,
-                Photo = "Test",
+                //Photo = await attachmentServices.UploadAsync(model.Image.OpenReadStream(), model.Image.FileName, "MemberPictures", ct),
                 Address = new Address()
                 {
                     BuildingNumber = model.BuildingNumber,
@@ -46,8 +54,28 @@ namespace GymSystem.BLL.Services.Classes
                 }
             };
 
+            var uploadResult = await attachmentServices.UploadAsync(model.Image.OpenReadStream(), model.Image.FileName, "MemberPictures", ct);
+
+            if (!uploadResult.IsSuccess)
+                return Result.Validation(uploadResult.Message!);
+
+            Member.Photo = uploadResult.Value!;
+
+            if (string.IsNullOrEmpty(Member.Photo))
+            {
+                return Result.Failure("Failed to upload member photo.");
+            }
+
             unitOfWork.GetRepository<Member>().Add(Member);
-            return await unitOfWork.CompeleteAsync() > 0;
+            var rows = await unitOfWork.CompeleteAsync();
+
+            if (rows <= 0)
+            {
+                attachmentServices.Delete(Member.Photo!, "MemberPictures");
+
+                return Result.Failure("Failed to save member.");
+            }
+            return Result.Success();
         }
 
         public async Task<bool> DeleteMemberAsync(int memberId, CancellationToken ct = default)
@@ -56,6 +84,13 @@ namespace GymSystem.BLL.Services.Classes
             var HasActiveMembership = await unitOfWork.GetRepository<Membership>().AnyAsync(m => m.MemberId == memberId && m.EndDate > DateTime.Now, ct);
 
             if (HasFutureSessions || HasActiveMembership) return false;
+
+            var member = await unitOfWork.GetRepository<Member>().GetByIdAsync(memberId, ct);
+            if (member == null) return false;
+
+            if (member.Photo is not null)
+                attachmentServices.Delete(member.Photo, "MemberPictures");
+            
 
             unitOfWork.GetRepository<Member>().Delete(memberId);    
             var Result = await unitOfWork.CompeleteAsync();
