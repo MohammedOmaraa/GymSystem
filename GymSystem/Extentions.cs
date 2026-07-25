@@ -1,5 +1,7 @@
 ﻿using GymSystem.DAL.Contexts;
 using GymSystem.DAL.DataSeeds;
+using GymSystem.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSystem;
@@ -17,6 +19,9 @@ public static class Extensions
         var context = services.GetRequiredService<GymDbContext>();
 
         var logger = services.GetRequiredService<ILogger<Program>>();
+
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
         var pendingMigrations =
             await context.Database.GetPendingMigrationsAsync(ct);
@@ -46,6 +51,12 @@ public static class Extensions
         await DataSeeder.SeedAsync(
             context,
             seedFilesPath,
+            logger,
+            ct);
+
+        await IdentityDataSeeds.SeedIdentityAsync(
+            roleManager,
+            userManager,
             logger,
             ct);
     }
