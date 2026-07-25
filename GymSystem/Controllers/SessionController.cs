@@ -22,6 +22,8 @@ namespace GymSystem.Controllers
             return View(Sessions);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Create(CancellationToken ct)
         {
             await PopulateDropDownsAsync(ct);
@@ -29,6 +31,7 @@ namespace GymSystem.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Create(CreateSessionViewModel model, CancellationToken ct)
         {
             if (!ModelState.IsValid)

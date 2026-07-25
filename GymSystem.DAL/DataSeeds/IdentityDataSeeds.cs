@@ -53,7 +53,7 @@ namespace GymSystem.DAL.DataSeeds
 
                 if (!HasUsers)
                 {
-                    var superAdminUser = new ApplicationUser
+                    var User = new ApplicationUser
                     {
                         FirstName = "Mohamed",
                         LastName = "Omara",
@@ -62,14 +62,14 @@ namespace GymSystem.DAL.DataSeeds
                         PhoneNumber = "01001025572",
                     };
 
-                    var result = await userManager.CreateAsync(superAdminUser, "MohamedOmara@123");
+                    var result = await userManager.CreateAsync(User,"MohamedOmara@123");
                     if (result.Succeeded)
                     {
-                        await userManager.AddToRoleAsync(superAdminUser, "SuperAdmin");
+                        await userManager.AddToRoleAsync(User, "Admin");
                     }
                     else
                     {
-                        logger.LogError($"Failed to create user '{superAdminUser.UserName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        logger.LogError($"Failed to create user '{User.UserName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
                     }
                 }
                 return;
