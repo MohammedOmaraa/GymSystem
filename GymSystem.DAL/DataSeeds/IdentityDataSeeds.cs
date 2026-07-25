@@ -1,6 +1,7 @@
 ﻿
 using GymSystem.DAL.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace GymSystem.DAL.DataSeeds
@@ -15,8 +16,8 @@ namespace GymSystem.DAL.DataSeeds
         {
             try
             {
-                bool HasUsers = userManager.Users.Any();
-                bool HasRoles = roleManager.Roles.Any();
+                bool HasUsers = await userManager.Users.AnyAsync(ct);
+                bool HasRoles = await roleManager.Roles.AnyAsync(ct);
 
                 if (HasUsers && HasRoles)
                 {

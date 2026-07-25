@@ -1,9 +1,11 @@
 ﻿using GymSystem.DAL.Entities;
 using GymSystem.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymSystem.Controllers
 {
+    [Authorize]
     public class PlanController : Controller
     {
         private readonly IGrnericRepository<Plan> planRepository;
